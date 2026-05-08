@@ -3,19 +3,31 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+#Dashboard Title
 st.title("Retail Sales Forecasting Dashboard")
 
+#Description
 st.write("Predict Walmart Weekly Sales using Machine Learning")
+
+#Load Dataset
 df = pd.read_csv("Walmart_Sales.csv")
+
+#Changing the format
 df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+
+# Extract useful temporal features
 df['Year'] = df['Date'].dt.year
 df['Month'] = df['Date'].dt.month
 df['Week'] = df['Date'].dt.isocalendar().week
 
-## SIDEBAR INPUTS
+#SIDEBAR INPUTS
 st.sidebar.header("Input Features")
 
-store = st.sidebar.number_input("Store", min_value=1)
+store = st.sidebar.number_input(
+    "Store",
+    min_value=1
+)
 
 holiday = st.sidebar.selectbox(
     "Holiday Flag",
@@ -27,6 +39,7 @@ temperature = st.sidebar.slider(
     float(df['Temperature'].min()),
     float(df['Temperature'].max())
 )
+
 fuel_price = st.sidebar.slider(
     "Fuel Price",
     float(df['Fuel_Price'].min()),
@@ -61,8 +74,11 @@ week = st.sidebar.slider(
     1,
     52
 )
+
+#Load Trained Model
 model = pickle.load(open("model.pkl", "rb"))
 
+#Input Data
 input_data = pd.DataFrame({
     'Store':[store],
     'Holiday_Flag':[holiday],
@@ -75,6 +91,7 @@ input_data = pd.DataFrame({
     'Week':[week]
 })
 
+#Prediction Button
 if st.button("Predict Sales"):
 
     prediction = model.predict(input_data)
@@ -82,8 +99,9 @@ if st.button("Predict Sales"):
     st.success(
         f"Predicted Weekly Sales: ${prediction[0]:,.2f}"
     )
-    
-    st.subheader("Monthly Sales Trend")
+
+#Monthly Sales Trend
+st.subheader("Monthly Sales Trend")
 
 monthly_sales = df.groupby('Month')['Weekly_Sales'].mean()
 
@@ -94,12 +112,14 @@ ax.plot(
     monthly_sales.values,
     marker='o'
 )
+
 ax.set_xlabel("Month")
 ax.set_ylabel("Average Weekly Sales")
 ax.set_title("Average Monthly Sales")
 
 st.pyplot(fig)
 
+#Holiday vs Non-Holiday Sales
 st.subheader("Holiday vs Non-Holiday Sales")
 
 fig2, ax2 = plt.subplots(figsize=(8,5))
@@ -114,6 +134,8 @@ sns.boxplot(
 ax2.set_title("Holiday vs Non-Holiday Sales")
 
 st.pyplot(fig2)
+
+#Feature Correlation Heatmap
 st.subheader("Feature Correlation")
 
 fig3, ax3 = plt.subplots(figsize=(10,6))
