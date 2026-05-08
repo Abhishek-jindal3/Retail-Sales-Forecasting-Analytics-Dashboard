@@ -1,14 +1,19 @@
-import datetime
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logging
-import tensorflow as tf
-from tensorflow import keras
+import datetime
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import datetime
-import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import tensorflow as tf
+from tensorflow import keras
 import pickle
+
 #import dataset
 df=pd.read_csv("Walmart_Sales.csv")
 
@@ -66,14 +71,13 @@ X = df.drop('Weekly_Sales', axis=1)
 y = df['Weekly_Sales']
 
 
-from sklearn.model_selection import train_test_split
+# distributing the data for test and train
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
 # Feature Scaling
-from sklearn.preprocessing import StandardScaler
 
 scaler = StandardScaler()
 
@@ -81,19 +85,17 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # Linear Regression
-from sklearn.linear_model import LinearRegression
 
 lr = LinearRegression()
 lr.fit(X_train, y_train)
 
+
 #random forest regression
-from sklearn.ensemble import RandomForestRegressor
 
 rf = RandomForestRegressor(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 
 # Evaluate the model
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 y_pred = rf.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
 rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -122,7 +124,7 @@ plt.title('Feature Importance')
 plt.show()
 
 
-
+#creation of ANN model using tensorflow
 
 ann = keras.Sequential([
     keras.layers.Input(shape=(X_train_scaled.shape[1],)),
